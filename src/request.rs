@@ -6,9 +6,13 @@ use hyper::uri::RequestUri::AbsolutePath;
 use hyper::method::Method;
 use hyper::header::Headers;
 use url::{Url, ParseError};
+use regex::Captures;
+
+pub type UrlParams<'t> = Captures<'t>;
 
 pub struct Request<'a, 'b: 'a> {
     pub req: UnwrappedRequest<'a, 'b>,
+    url_params: Option<UrlParams<'b>>,
     parsed_url: Url
 }
 
@@ -20,6 +24,7 @@ impl<'a, 'b> Request<'a, 'b> {
         };
         Request {
             req: req,
+            url_params: None,
             parsed_url: request_url.unwrap()
         }
     }
@@ -37,6 +42,11 @@ impl<'a, 'b> Request<'a, 'b> {
     #[inline]
     pub fn remote_addr(&self) -> &SocketAddr {
         &self.req.remote_addr
+    }
+
+    #[inline]
+    pub fn url_params(&mut self) -> &mut Option<UrlParams<'b>> {
+        &mut self.url_params
     }
 
     #[inline]

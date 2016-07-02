@@ -43,9 +43,12 @@ impl Router {
         }
     }
 
-    pub fn serve<'m, 'r>(&'m self, req: Request<'m, 'r>, res: Response<'m>) {
+    pub fn serve<'m, 'r>(&self, mut req: Request<'m, 'r>, res: Response<'m>) {
         match self.match_route(req.method(), req.path()) {
-            Some(route) => route.action.execute(req, res),
+            Some(route) => {
+                *req.url_params() = Some(route.path.matched(req.path()));
+                route.action.execute(req, res)
+            },
             None => panic!("Route not found.")
         };
     }
