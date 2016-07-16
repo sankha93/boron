@@ -16,8 +16,8 @@ struct RequestHandler {
 impl Handler for RequestHandler {
     fn handle<'a, 'k>(&'a self, req: UnwrappedRequest<'a, 'k>, res: UnwrappedResponse<'a>) {
         let boron_req = Request::wrap_request(req, &self.base_url);
-        let boron_res = Response::wrap_response(res);
-        self.router.serve(boron_req, boron_res);
+        //let boron_res = Response::wrap_response(res);
+        self.router.serve(boron_req, res);
     }
 }
 

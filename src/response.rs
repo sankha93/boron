@@ -1,10 +1,34 @@
+/*
 use std::io::{self, Write};
 use std::any::Any;
 use hyper::net::{Fresh, Streaming};
 use hyper::server::Response as UnwrappedResponse;
-use hyper::header::Headers;
+*/
+
+use std::convert::From;
+use hyper::header::{Headers, ContentLength};
 use hyper::status::StatusCode;
 
+pub struct Response {
+    pub status: StatusCode,
+    pub headers: Headers,
+    pub body: Option<Vec<u8>>
+}
+
+impl From<Vec<u8>> for Response {
+    fn from(body: Vec<u8>) -> Response {
+        let mut headers = Headers::new();
+        headers.set(ContentLength(body.len() as u64));
+
+        Response {
+            status: StatusCode::Ok,
+            headers: headers,
+            body: Some(body)
+        }
+    }
+}
+
+/*
 pub struct Response<'a, T: Any = Fresh> {
     res: UnwrappedResponse<'a, T>
 }
@@ -56,3 +80,4 @@ impl<'a> Write for Response<'a, Streaming> {
         self.res.flush()
     }
 }
+*/

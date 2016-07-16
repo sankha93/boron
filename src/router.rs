@@ -1,6 +1,7 @@
 use middleware::Middleware;
 use request::Request;
 use response::Response;
+use hyper::server::Response as UnwrappedResponse;
 use matcher::Matcher;
 use hyper::method::Method;
 
@@ -43,9 +44,18 @@ impl Router {
         }
     }
 
-    pub fn serve<'m, 'r>(&'m self, req: Request<'m, 'r>, res: Response<'m>) {
+    pub fn serve<'m, 'r>(&'m self, req: Request<'m, 'r>, mut res: UnwrappedResponse<'m>) {
         match self.match_route(req.method(), req.path()) {
-            Some(route) => route.action.execute(req, res),
+            Some(route) => {
+                match route.action.execute(req) {
+                    Ok(response) => {
+                        *res.status_mut() = response.status;
+                        *res.headers_mut() = response.headers;
+                        res.send(response.body.unwrap().as_slice());
+                    },
+                    _ => unreachable!()
+                }
+            },
             None => panic!("Route not found.")
         };
     }
